@@ -136,31 +136,23 @@ for itS = (1:Nsweep)
         % to obtain the ground state via the Lanczos method
 
         
-        [A,Eiter(N+1-itN,2*itS-1)] = eigs_2site_GS (Hlr{itN},Hs{itN},Hs{itN+1},Hlr{itN+3},contract(M{itN},3,2,M{itN+1},3,1,[1 3 2 4]),nKrylov,tol);
+        [A,Eiter(N-itN,2*itS-1)] = eigs_2site_GS (Hlr{itN},Hs{itN},Hs{itN+1},Hlr{itN+3},contract(M{itN},3,2,M{itN+1},3,1,[1 3 2 4]),nKrylov,tol);
 
         % SVD; now we can safely truncate small singular values;
-        [U,Sv{itN},M{itN+1}] = svdTr(A,4,[1 3],Nkeep,tol);
+        [U,Sv{itN+1},M{itN+1}] = svdTr(A,4,[1 3],Nkeep,tol);
 
 
-        if itN>1
-            M{itN} = contract(U,3,3,diag(Sv{itN}),2,1,[1 3 2]);
-        else
-            M{itN} = U;
-        end
+        M{itN} = contract(U,3,3,diag(Sv{itN+1}),2,1,[1 3 2]);
+        
 
-        Hlr{itN+2} = updateLeft(Hlr{itN+3},3,permute(M{itN+1},[2 1 3]), ...
-            permute(Hs{itN+1},[1 2 4 3]),4,permute(M{itN+1},[2 1 3]));
+        
         % update the next tensor
 
 
         % update the Hamiltonian in effective basis
-        
-        
-%             if itN==1
-%                 Hlr{itN+1} = updateLeft(Hlr{itN+2},3,permute(M{itN},[2 1 3]), ...
-%                 permute(Hs{itN},[1 2 4 3]),4,permute(M{itN},[2 1 3]));
-%             end
-        
+        Hlr{itN+2} = updateLeft(Hlr{itN+3},3,permute(M{itN+1},[2 1 3]), ...
+            permute(Hs{itN+1},[1 2 4 3]),4,permute(M{itN+1},[2 1 3]));
+
         % % % % TODO (end) % % % %
     end
 %     Hlr
@@ -181,15 +173,11 @@ for itS = (1:Nsweep)
 
 
         % SVD; now we can safely truncate small singular values;
-        [M{itN},Sv{itN},V] = svdTr(A,4,[1 3],Nkeep,tol);
+        [M{itN},Sv{itN+1},V] = svdTr(A,4,[1 3],Nkeep,tol);
         M{itN} = permute(M{itN},[1 3 2]);
 
-        if itN < N-1
-            M{itN+1} = contract(diag(Sv{itN}),2,2,V,3,1);
-        else
-            M{itN+1} = V;
-        end
-
+        M{itN+1} = contract(diag(Sv{itN+1}),2,2,V,3,1);
+        
         % update the Hamiltonian in effective basis
 %         disp(size(Hs{itN}))
 %         disp(size(Hlr{itN+1}))
